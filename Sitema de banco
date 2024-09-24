@@ -1,0 +1,118 @@
+import datetime
+
+# Função para obter a data e hora atual
+def data_hora_atual():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+# Função para depósito
+def depositar(saldo, extrato):
+    valor = float(input("Informe o valor do depósito: "))
+    if valor > 0:
+        saldo += valor
+        extrato += f"[{data_hora_atual()}] Depósito: R$ {valor:.2f}\n"
+        print(f"Depósito de R$ {valor:.2f} realizado com sucesso.")
+    else:
+        print("Operação falhou! O valor informado é inválido.")
+    return saldo, extrato
+
+# Função para saque
+def sacar(saldo, extrato, numero_saques, limite, LIMITE_SAQUES):
+    valor = float(input("Informe o valor do saque: "))
+    
+    excedeu_saldo = valor > saldo
+    excedeu_limite = valor > limite
+    excedeu_saques = numero_saques >= LIMITE_SAQUES
+
+    if excedeu_saldo:
+        print("Operação falhou! Você não tem saldo suficiente.")
+    elif excedeu_limite:
+        print("Operação falhou! O valor do saque excede o limite.")
+    elif excedeu_saques:
+        print("Operação falhou! Número máximo de saques excedido.")
+    elif valor > 0:
+        saldo -= valor
+        extrato += f"[{data_hora_atual()}] Saque: R$ {valor:.2f}\n"
+        numero_saques += 1
+        print(f"Saque de R$ {valor:.2f} realizado com sucesso.")
+    else:
+        print("Operação falhou! O valor informado é inválido.")
+    return saldo, extrato, numero_saques
+
+# Função para transferência
+def transferir(saldo, extrato, saldo_destino):
+    valor = float(input("Informe o valor da transferência: "))
+    if valor > 0 and valor <= saldo:
+        saldo -= valor
+        saldo_destino += valor
+        extrato += f"[{data_hora_atual()}] Transferência: R$ {valor:.2f}\n"
+        print(f"Transferência de R$ {valor:.2f} realizada com sucesso.")
+    else:
+        print("Operação falhou! Valor inválido ou saldo insuficiente.")
+    return saldo, extrato, saldo_destino
+
+# Função para exibir extrato
+def exibir_extrato(saldo, extrato):
+    print("\n================ EXTRATO ================")
+    print("Não foram realizadas movimentações." if not extrato else extrato)
+    print(f"\nSaldo: R$ {saldo:.2f}")
+    print("==========================================")
+
+# Função para autenticação de usuário
+def autenticar(usuarios):
+    username = input("Digite seu nome de usuário: ")
+    senha = input("Digite sua senha: ")
+    
+    if username in usuarios and usuarios[username] == senha:
+        print(f"Bem-vindo(a), {username}!")
+        return True
+    else:
+        print("Usuário ou senha incorretos.")
+        return False
+
+# Menu
+menu = """
+[d] Depositar
+[s] Sacar
+[t] Transferir
+[e] Extrato
+[q] Sair
+
+=> """
+
+# Base de usuários para autenticação
+usuarios = {
+    "cliente1": "senha123",
+    "cliente2": "senha456"
+}
+
+# Variáveis principais
+saldo = 0
+saldo_destino = 0  # Saldo da "conta de destino" para transferências
+limite = 500
+extrato = ""
+numero_saques = 0
+LIMITE_SAQUES = 3
+
+# Autenticação
+if autenticar(usuarios):
+    while True:
+        opcao = input(menu)
+
+        if opcao == "d":
+            saldo, extrato = depositar(saldo, extrato)
+        
+        elif opcao == "s":
+            saldo, extrato, numero_saques = sacar(saldo, extrato, numero_saques, limite, LIMITE_SAQUES)
+
+        elif opcao == "t":
+            saldo, extrato, saldo_destino = transferir(saldo, extrato, saldo_destino)
+
+        elif opcao == "e":
+            exibir_extrato(saldo, extrato)
+
+        elif opcao == "q":
+            print("Saindo do sistema bancário. Até logo!")
+            break
+
+        else:
+            print("Operação inválida, por favor selecione novamente a operação desejada.")
